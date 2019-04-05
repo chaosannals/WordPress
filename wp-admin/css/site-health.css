@@ -271,12 +271,16 @@
 	border: 1px solid #e2e4e7;
 }
 
-.health-check-accordion dt {
-	font-weight: 600;
+.health-check-accordion-heading {
+	margin: 0;
 	border-top: 1px solid #e2e4e7;
+	font-size: inherit;
+	line-height: inherit;
+	font-weight: 600;
+	color: inherit;
 }
 
-.health-check-accordion dt:first-child {
+.health-check-accordion-heading:first-child {
 	border-top: none;
 }
 
@@ -389,10 +393,29 @@
 	display: none;
 }
 
+/* Better position for the WordPress admin notices and update nag. */
+.site-health .notice {
+	margin: 5px 20px 15px 22px;
+}
+
+.site-health .update-nag {
+	margin-bottom: 20px;
+	margin-left: 22px;
+}
+
 @media screen and (max-width: 782px) {
 	.health-check-body {
 		margin: 0 12px;
 		width: auto;
+	}
+
+	.site-health .notice {
+		margin: 5px 10px 15px;
+	}
+
+	.site-health .update-nag {
+		margin-right: 10px;
+		margin-left: 10px;
 	}
 }
 

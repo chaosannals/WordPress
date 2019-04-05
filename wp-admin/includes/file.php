@@ -1154,6 +1154,9 @@ function verify_file_signature( $filename, $signatures, $filename_for_errors = f
 				/* translators: 1: The filename of the package. */
 				__( 'The authenticity of %1$s could not be verified as no signature was found.' ),
 				'<span class="code">' . esc_html( $filename_for_errors ) . '</span>'
+			),
+			array(
+				'filename' => $filename_for_errors,
 			)
 		);
 	}
@@ -1163,11 +1166,14 @@ function verify_file_signature( $filename, $signatures, $filename_for_errors = f
 
 	mbstring_binary_safe_encoding();
 
+	$skipped_key = $skipped_signature = 0;
+
 	foreach ( (array) $signatures as $signature ) {
 		$signature_raw = base64_decode( $signature );
 
 		// Ensure only valid-length signatures are considered.
 		if ( SODIUM_CRYPTO_SIGN_BYTES !== strlen( $signature_raw ) ) {
+			$skipped_signature++;
 			continue;
 		}
 
@@ -1176,6 +1182,7 @@ function verify_file_signature( $filename, $signatures, $filename_for_errors = f
 
 			// Only pass valid public keys through.
 			if ( SODIUM_CRYPTO_SIGN_PUBLICKEYBYTES !== strlen( $key_raw ) ) {
+				$skipped_key++;
 				continue;
 			}
 
@@ -1197,10 +1204,14 @@ function verify_file_signature( $filename, $signatures, $filename_for_errors = f
 		),
 		// Error data helpful for debugging:
 		array(
-			'filename'   => $filename_for_errors,
-			'keys'       => $trusted_keys,
-			'signatures' => $signatures,
-			'hash'       => bin2hex( $file_hash ),
+			'filename'    => $filename_for_errors,
+			'keys'        => $trusted_keys,
+			'signatures'  => $signatures,
+			'hash'        => bin2hex( $file_hash ),
+			'skipped_key' => $skipped_key,
+			'skipped_sig' => $skipped_signature,
+			'php'         => phpversion(),
+			'sodium'      => defined( 'SODIUM_LIBRARY_VERSION' ) ? SODIUM_LIBRARY_VERSION : ( defined( 'ParagonIE_Sodium_Compat::VERSION_STRING' ) ? ParagonIE_Sodium_Compat::VERSION_STRING : false ),
 		)
 	);
 }
@@ -1210,7 +1221,7 @@ function verify_file_signature( $filename, $signatures, $filename_for_errors = f
  *
  * @since 5.2.0
  *
- * @return array List of hex-encoded Signing keys.
+ * @return array List of base64-encoded Signing keys.
  */
 function wp_trusted_keys() {
 	$trusted_keys = array();
@@ -1263,8 +1274,8 @@ function unzip_file( $file, $to ) {
 	$needed_dirs = array();
 	$to          = trailingslashit( $to );
 
-	// Determine any parent dir's needed (of the upgrade directory)
-	if ( ! $wp_filesystem->is_dir( $to ) ) { //Only do parents if no children exist
+	// Determine any parent directories needed (of the upgrade directory).
+	if ( ! $wp_filesystem->is_dir( $to ) ) { // Only do parents if no children exist.
 		$path = preg_split( '![/\\\]!', untrailingslashit( $to ) );
 		for ( $i = count( $path ); $i >= 0; $i-- ) {
 			if ( empty( $path[ $i ] ) ) {
@@ -1279,7 +1290,7 @@ function unzip_file( $file, $to ) {
 			if ( ! $wp_filesystem->is_dir( $dir ) ) {
 				$needed_dirs[] = $dir;
 			} else {
-				break; // A folder exists, therefor, we dont need the check the levels below this
+				break; // A folder exists, therefore we don't need to check the levels below this.
 			}
 		}
 	}
