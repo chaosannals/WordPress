@@ -1,0 +1,17 @@
+/*
+Theme Name: Halficial
+Theme URI: https://github.com/chaosannals/halficial
+Author: ChaosAnnals
+Author URI: https://github.com/chaosannals
+Description: 基础开发版本
+Requires at least: WordPress 5.1.1
+Version: 0.1
+License: GNU General Public License v2 or later
+License URI: LICENSE
+*/
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
